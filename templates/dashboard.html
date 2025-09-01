@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Appointment Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem 0; text-align: center; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem; overflow: hidden; }
+        .card-header { background: #f8f9fa; padding: 1rem 2rem; border-bottom: 1px solid #e9ecef; font-weight: 600; }
+        .card-body { padding: 2rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: white; padding: 1.5rem; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: bold; display: block; }
+        .stat-label { opacity: 0.9; margin-top: 0.5rem; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e9ecef; }
+        .table th { background: #f8f9fa; font-weight: 600; }
+        .btn { padding: 0.5rem 1rem; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn:hover { background: #5a67d8; }
+        .chat-link { position: fixed; bottom: 2rem; right: 2rem; background: #10b981; color: white; padding: 1rem; border-radius: 50px; text-decoration: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .chat-link:hover { background: #059669; }
+        .nav-buttons { position: absolute; top: 1rem; right: 2rem; }
+        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; text-decoration: none; margin-left: 0.5rem; transition: all 0.3s; }
+        .nav-btn:hover { background: rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav-buttons">
+            <a href="/register" class="nav-btn">+ Register</a>
+            <a href="/chat" class="nav-btn">💬 Chat</a>
+        </div>
+        <h1>🏥 AI Appointment Dashboard</h1>
+        <p>Intelligent appointment scheduling with specialized agents</p>
+    </div>
+
+    <div class="container">
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <span class="stat-number" id="patient-count">-</span>
+                <div class="stat-label">Total Patients</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="appointment-count">-</span>
+                <div class="stat-label">Active Appointments</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">4</span>
+                <div class="stat-label">Available Doctors</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">4</span>
+                <div class="stat-label">AI Agents</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Available Doctors</div>
+            <div class="card-body">
+                <table class="table" id="doctors-table">
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Specialty</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctors-body">
+                        <tr><td colspan="3">Loading doctors...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Recent Appointments</div>
+            <div class="card-body">
+                <table class="table" id="appointments-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointments-body">
+                        <tr><td colspan="5">Loading appointments...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-header">Registered Patients</div>
+            <div class="card-body">
+                <table class="table" id="patients-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Condition</th>
+                            <th>Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patients-body">
+                        <tr><td colspan="4">Loading patients...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">System Status</div>
+            <div class="card-body">
+                <div id="system-status">
+                    <p>🤖 <strong>Chat Agent:</strong> <span class="status">Active</span></p>
+                    <p>📅 <strong>Scheduling Agent:</strong> <span class="status">Active</span></p>
+                    <p>🔍 <strong>Query Agent:</strong> <span class="status">Active</span></p>
+                    <p>⚙️ <strong>Management Agent:</strong> <span class="status">Active</span></p>
+                    <p>💾 <strong>Data Store:</strong> <span class="status">Active</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="/chat" class="chat-link">💬 Chat Assistant</a>
+
+    <script>
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load doctors
+                const doctorsResponse = await fetch('/api/doctors');
+                const doctorsData = await doctorsResponse.json();
+                
+                const doctorsBody = document.getElementById('doctors-body');
+                doctorsBody.innerHTML = '';
+                
+                doctorsData.doctors.forEach(doctor => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${doctor.name}</td>
+                        <td>${doctor.specialty}</td>
+                        <td><span style="color: green;">Available</span></td>
+                    `;
+                    doctorsBody.appendChild(row);
+                });
+
+                // Load patients
+                const patientsResponse = await fetch('/api/patients');
+                const patientsData = await patientsResponse.json();
+                
+                const patientsBody = document.getElementById('patients-body');
+                patientsBody.innerHTML = '';
+                
+                if (patientsData.patients.length === 0) {
+                    patientsBody.innerHTML = '<tr><td colspan="4">No patients registered yet. Add one using the form above!</td></tr>';
+                } else {
+                    patientsData.patients.forEach(patient => {
+                        const row = document.createElement('tr');
+                        const createdDate = new Date(patient.created_at).toLocaleDateString();
+                        row.innerHTML = `
+                            <td><strong>${patient.name}</strong></td>
+                            <td>${patient.age}</td>
+                            <td>${patient.condition}</td>
+                            <td>${createdDate}</td>
+                        `;
+                        patientsBody.appendChild(row);
+                    });
+                }
+
+                // Load appointments
+                const appointmentsResponse = await fetch('/api/appointments');
+                const appointmentsData = await appointmentsResponse.json();
+                
+                const appointmentsBody = document.getElementById('appointments-body');
+                appointmentsBody.innerHTML = '';
+                
+                if (appointmentsData.appointments.length === 0) {
+                    appointmentsBody.innerHTML = '<tr><td colspan="5">No appointments scheduled yet. Try the chat assistant!</td></tr>';
+                } else {
+                    appointmentsData.appointments.forEach(apt => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${apt.patient_name}</td>
+                            <td>${apt.doctor_name}</td>
+                            <td>${apt.date}</td>
+                            <td>${apt.time}</td>
+                            <td><span style="color: green;">${apt.status}</span></td>
+                        `;
+                        appointmentsBody.appendChild(row);
+                    });
+                }
+
+                // Update stats
+                const statsResponse = await fetch('/api/stats');
+                const statsData = await statsResponse.json();
+                
+                document.getElementById('patient-count').textContent = statsData.data_store.statistics.total_patients;
+                document.getElementById('appointment-count').textContent = statsData.data_store.statistics.active_appointments;
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load dashboard data
+            loadDashboard();
+            setInterval(loadDashboard, 30000); // Auto-refresh every 30 seconds
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Assistant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; height: 100vh; display: flex; flex-direction: column; }
+        
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; text-align: center; }
+        .back-btn { position: absolute; left: 1rem; top: 1rem; background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; text-decoration: none; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .chat-container { flex: 1; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 100%; }
+        .messages { flex: 1; padding: 2rem; overflow-y: auto; }
+        .message { margin-bottom: 1rem; display: flex; }
+        .message.user { justify-content: flex-end; }
+        .message.assistant { justify-content: flex-start; }
+        
+        .message-bubble { max-width: 70%; padding: 1rem; border-radius: 18px; word-wrap: break-word; }
+        .message.user .message-bubble { background: #667eea; color: white; }
+        .message.assistant .message-bubble { background: white; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .message-meta { font-size: 0.75rem; opacity: 0.7; margin-top: 0.5rem; }
+        .agent-badge { display: inline-block; background: #10b981; color: white; font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 10px; margin-left: 0.5rem; }
+        
+        .input-area { background: white; border-top: 1px solid #e9ecef; padding: 1rem; }
+        .input-container { display: flex; gap: 0.5rem; max-width: 800px; margin: 0 auto; }
+        #message-input { flex: 1; padding: 1rem; border: 1px solid #e9ecef; border-radius: 25px; outline: none; font-size: 1rem; }
+        #send-btn { padding: 1rem 2rem; background: #667eea; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; }
+        #send-btn:hover:not(:disabled) { background: #5a67d8; }
+        #send-btn:disabled { background: #a0aec0; cursor: not-allowed; }
+        
+        .typing { opacity: 0.7; font-style: italic; }
+        .error { background: #feb2b2 !important; color: #c53030 !important; }
+        
+        .welcome-message { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; text-align: center; }
+        .welcome-message h3 { margin-bottom: 1rem; }
+        .examples { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+        .example { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        .example:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-btn">← Dashboard</a>
+        <h1>🤖 AI Chat Assistant</h1>
+        <p>Powered by 4 specialized agents for seamless appointment management</p>
+    </div>
+
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="welcome-message">
+                <h3>Welcome! I'm your AI appointment assistant.</h3>
+                <p>I can help you book appointments, check availability, reschedule, or cancel appointments using natural language.</p>
+                
+                <div class="examples">
+                    <div class="example" onclick="sendExample(this)">
+                        "Hi, I'm John Smith and I need an appointment with Dr. Adams tomorrow at 2 PM"
+                    </div>
+                    <div class="example" onclick="sendExample(this)">
+                        "What times does Dr. Clark have available this week?"
+                    </div>
+                    <div class="example" onclick="sendExample(this)">
+                        "I need to see a dermatologist as soon as possible"
+                    </div>
+                    <div class="example" onclick="sendExample(this)">
+                        "Cancel my appointment with Dr. Baker on Friday"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-container">
+                <input type="text" id="message-input" placeholder="Type your message... (e.g., 'Book me with Dr. Adams tomorrow at 3 PM')" onkeypress="if(event.key==='Enter') sendMessage()">
+                <button id="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const sessionId = 'session_' + Date.now(); // Simple session ID
+
+        function addMessage(content, isUser = false, agentUsed = null, success = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = `message-bubble ${success ? '' : 'error'}`;
+            bubbleDiv.innerHTML = content;
+            
+            if (!isUser && agentUsed && agentUsed !== 'chat') {
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'message-meta';
+                metaDiv.innerHTML = `<span class="agent-badge">${agentUsed} agent</span>`;
+                bubbleDiv.appendChild(metaDiv);
+            }
+            
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.id = 'typing-message';
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble typing';
+            bubbleDiv.textContent = 'AI is thinking...';
+            
+            typingDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typingMessage = document.getElementById('typing-message');
+            if (typingMessage) {
+                typingMessage.remove();
+            }
+        }
+
+        async function sendMessage(text = null) {
+            const message = text || messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, true);
+            if (!text) messageInput.value = '';
+
+            // Disable send button
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+
+            // Show typing indicator
+            showTyping();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message, 
+                        session_id: sessionId 
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Hide typing indicator
+                hideTyping();
+
+                if (response.ok) {
+                    // Add assistant response
+                    addMessage(
+                        data.message, 
+                        false, 
+                        data.agent_used,
+                        data.success
+                    );
+
+                    // If appointment was booked successfully, suggest viewing dashboard
+                    if (data.success && data.intent === 'schedule' && data.data && data.data.appointment_id) {
+                        setTimeout(() => {
+                            addMessage(
+                                '✅ <strong>Appointment booked successfully!</strong><br><br>' +
+                                '<a href="/" style="color: #667eea; text-decoration: none;">← View Dashboard</a> to see all your appointments.',
+                                false,
+                                'system',
+                                true
+                            );
+                        }, 1000);
+                    }
+                } else {
+                    addMessage(
+                        `Sorry, I encountered an error: ${data.detail || 'Unknown error'}`,
+                        false,
+                        'error',
+                        false
+                    );
+                }
+
+            } catch (error) {
+                hideTyping();
+                addMessage(
+                    'I\'m having trouble connecting. Please check your internet connection and try again.',
+                    false,
+                    'error',
+                    false
+                );
+                console.error('Chat error:', error);
+            }
+
+            // Re-enable send button
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send';
+            messageInput.focus();
+        }
+
+        function sendExample(element) {
+            const text = element.textContent.trim().replace(/^"|"$/g, '');
+            sendMessage(text);
+        }
+
+        // Focus on input when page loads
+        messageInput.focus();
+    </script>
+</body>
+</html>

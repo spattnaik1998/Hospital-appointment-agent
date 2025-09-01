@@ -1,0 +1,130 @@
+# ============================================================================
+# AI APPOINTMENT SYSTEM - GITIGNORE
+# ============================================================================
+
+# ===== CONFIDENTIAL DATA & PATIENT INFORMATION =====
+# CRITICAL: Never commit patient data or sensitive information
+appointment_data.json
+appointment_data.json.backup
+appointment_data_backup_*.json
+*.backup
+patient_data/
+medical_records/
+backups/
+
+# ===== API KEYS & ENVIRONMENT VARIABLES =====
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.key
+*.pem
+config.json
+secrets.json
+api_keys.txt
+credentials.json
+
+# ===== PASSWORDS & SENSITIVE FILES =====
+passwords.txt
+secrets.txt
+keys.txt
+auth.txt
+*.credentials
+*.secret
+
+# ===== PYTHON CACHE & BYTECODE =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===== VIRTUAL ENVIRONMENTS =====
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+env.bak/
+venv.bak/
+
+# ===== IDE & EDITOR FILES =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===== LOGS & TEMPORARY FILES =====
+*.log
+logs/
+temp/
+tmp/
+*.tmp
+*.temp
+
+# ===== JUPYTER NOTEBOOKS (checkpoints) =====
+.ipynb_checkpoints
+
+# ===== TESTING & COVERAGE =====
+.coverage
+.pytest_cache/
+.tox/
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# ===== DATABASE FILES (if using SQLite locally) =====
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== OS GENERATED FILES =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== DEPLOYMENT & DOCKER =====
+docker-compose.override.yml
+.dockerignore
+Dockerfile.local
+
+# ===== DEVELOPMENT EXTRAS (keep separate from main codebase) =====
+extras/prototype_*.py
+extras/test_*.py
+extras/passwords.txt
+extras/functions_practice.py
+extras/python_practice.py
+extras/PIG.py
+extras/Madlibs.py
+
+# ===== DOCUMENTATION DRAFTS =====
+Documentation/Notes/
+*.draft.md
+NOTES.md
